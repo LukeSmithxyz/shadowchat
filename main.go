@@ -169,7 +169,7 @@ func main() {
 	http.HandleFunc("/view", view_handler)
 
 	os.OpenFile("log/paid.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	os.OpenFile("log/alertlog.csv", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	os.OpenFile("log/alertqueue.csv", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	os.OpenFile("log/superchats.csv", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 
 	indexTemplate, _ = template.ParseFiles("web/index.html")
@@ -358,7 +358,7 @@ func check_handler(w http.ResponseWriter, r *http.Request) {
 					}
 					defer f.Close()
 					csvAppend := fmt.Sprintf(`"%s","%s","%s","%s"`, c.PayID, html.EscapeString(c.Name), html.EscapeString(c.Msg), fmt.Sprint(c.Received))
-					a, err := os.OpenFile("log/alertlog.csv",
+					a, err := os.OpenFile("log/alertqueue.csv",
 						os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 					if err != nil {
 						log.Println(err)
@@ -472,7 +472,7 @@ func check_handler(w http.ResponseWriter, r *http.Request) {
 					}
 					defer f.Close()
 					csvAppend := fmt.Sprintf(`"%s","%s","%s","%s"`, c.PayID, html.EscapeString(c.Name), html.EscapeString(c.Msg), fmt.Sprint(c.Received))
-					a, err := os.OpenFile("log/alertlog.csv",
+					a, err := os.OpenFile("log/alertqueue.csv",
 						os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 					if err != nil {
 						log.Println(err)
@@ -506,7 +506,7 @@ func alert_handler(w http.ResponseWriter, r *http.Request) {
 	var v csvLog
 	if r.FormValue("auth") == password {
 
-		csvFile, err := os.Open("log/alertlog.csv")
+		csvFile, err := os.Open("log/alertqueue.csv")
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -519,7 +519,7 @@ func alert_handler(w http.ResponseWriter, r *http.Request) {
 
 		// Remove top line of CSV file after displaying it
 		if csvLines != nil {
-			popFile, _ := os.OpenFile("log/alertlog.csv", os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
+			popFile, _ := os.OpenFile("log/alertqueue.csv", os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
 			popFirst := csvLines[1:]
 			w := csv.NewWriter(popFile)
 			w.WriteAll(popFirst)
