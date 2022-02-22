@@ -26,7 +26,8 @@ var MessageMaxChar int = 250
 var NameMaxChar int = 25
 var StreamlabsKey string = "" // Refer to instructions on how to get this key.
 var rpcURL string = "http://127.0.0.1:28088/json_rpc"
-var username string = "admin" // chat log /view page
+var username string = "admin"                // chat log /view page
+var AlertWidgetRefreshInterval string = "10" //seconds
 
 // this is the password for both the /view page and the OBS /alert page
 // example OBS url: https://example.com/alert?auth=adminadmin
@@ -67,6 +68,7 @@ type csvLog struct {
 	Message       string
 	Amount        string
 	DisplayToggle string
+	Refresh       string
 }
 
 type viewPageData struct {
@@ -540,6 +542,7 @@ func topwidget_handler(w http.ResponseWriter, r *http.Request) {
 
 func alert_handler(w http.ResponseWriter, r *http.Request) {
 	var v csvLog
+	v.Refresh = AlertWidgetRefreshInterval
 	if r.FormValue("auth") == password {
 
 		csvFile, err := os.Open("log/alertqueue.csv")

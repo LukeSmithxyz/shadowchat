@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta http-equiv="refresh" content="10">
+<meta http-equiv="refresh" content="{{.Refresh}}">
 <title>OBS Alert</title>
 <style>
 body {
@@ -12,7 +12,7 @@ body {
   padding: 0;
   {{.DisplayToggle}}
   animation: fade-away;
-  animation-duration: 9s;
+  animation-duration: {{.Refresh}}s;
   animation-fill-mode: forwards;
   animation-iteration-count: 1;
 }
