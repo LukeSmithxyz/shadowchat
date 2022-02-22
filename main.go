@@ -37,6 +37,7 @@ var payTemplate *template.Template
 var checkTemplate *template.Template
 var alertTemplate *template.Template
 var viewTemplate *template.Template
+var topwidgetTemplate *template.Template
 
 type checkPage struct {
 	Addy     string
@@ -167,6 +168,7 @@ func main() {
 	http.HandleFunc("/check", check_handler)
 	http.HandleFunc("/alert", alert_handler)
 	http.HandleFunc("/view", view_handler)
+	http.HandleFunc("/top", topwidget_handler)
 
 	os.OpenFile("log/paid.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	os.OpenFile("log/alertqueue.csv", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
@@ -177,6 +179,7 @@ func main() {
 	checkTemplate, _ = template.ParseFiles("web/check.html")
 	alertTemplate, _ = template.ParseFiles("web/alert.html")
 	viewTemplate, _ = template.ParseFiles("web/view.html")
+	topwidgetTemplate, _ = template.ParseFiles("web/top.html")
 	http.ListenAndServe(":8900", nil)
 }
 
@@ -368,6 +371,9 @@ func check_handler(w http.ResponseWriter, r *http.Request) {
 					if _, err := f.WriteString(csvAppend + "\n"); err != nil {
 						log.Println(err)
 					}
+					if r.FormValue("hide") == "true" {
+						csvAppend = fmt.Sprintf(`"%s","%s","%s","???"`, c.PayID, html.EscapeString(c.Name), html.EscapeString(c.Msg))
+					}
 					if _, err := a.WriteString(csvAppend + "\n"); err != nil {
 						log.Println(err)
 					}
@@ -482,6 +488,9 @@ func check_handler(w http.ResponseWriter, r *http.Request) {
 					if _, err := f.WriteString(csvAppend + "\n"); err != nil {
 						log.Println(err)
 					}
+					if r.FormValue("hide") == "true" {
+						csvAppend = fmt.Sprintf(`"%s","%s","%s","???"`, c.PayID, html.EscapeString(c.Name), html.EscapeString(c.Msg))
+					}
 					if _, err := a.WriteString(csvAppend + "\n"); err != nil {
 						log.Println(err)
 					}
@@ -500,6 +509,33 @@ func check_handler(w http.ResponseWriter, r *http.Request) {
 
 func index_handler(w http.ResponseWriter, r *http.Request) {
 	indexTemplate.Execute(w, nil)
+}
+func topwidget_handler(w http.ResponseWriter, r *http.Request) {
+	u, p, ok := r.BasicAuth()
+	if !ok {
+		w.Header().Add("WWW-Authenticate", `Basic realm="Give username and password"`)
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+	if (u == username) && (p == password) {
+		csvFile, err := os.Open("log/superchats.csv")
+		if err != nil {
+			fmt.Println(err)
+		}
+		defer csvFile.Close()
+
+		// TODO: Add an OBS widget displaying top n donors. Don't include amounts set as hidden by donor
+
+		//csvLines, err := csv.NewReader(csvFile).ReadAll()
+		//if err != nil {
+		//	fmt.Println(err)
+		//}
+
+	} else {
+		w.WriteHeader(http.StatusUnauthorized)
+		return // return http 401 unauthorized error
+	}
+	topwidgetTemplate.Execute(w, nil)
 }
 
 func alert_handler(w http.ResponseWriter, r *http.Request) {
@@ -573,6 +609,7 @@ func payment_handler(w http.ResponseWriter, r *http.Request) {
 			params.Add("name", s.Name)
 			params.Add("msg", condenseSpaces(r.FormValue("message")))
 			params.Add("media", condenseSpaces(s.Media))
+			params.Add("hide", html.EscapeString(r.FormValue("hidden")))
 			s.CheckURL = params.Encode()
 
 			tmp, _ := qrcode.Encode(fmt.Sprintf("monero:%s?tx_amount=%s", resp.Result.IntegratedAddress, s.Amount), qrcode.Low, 320)
