@@ -20,7 +20,7 @@ import (
 
 var discordURI string = ""        // Paste discord webhook url
 var DiscordAvatar string = ""     // URL to image to use as discord avatar
-var ScamThreshold float64 = 0.005 // Discard donation messages lower than this (XMR)
+var ScamThreshold float64 = 0.005 // MINIMUM DONATION AMOUNT
 var MediaMin float64 = 0.025      // Currently unused
 var MessageMaxChar int = 250
 var NameMaxChar int = 25
@@ -510,7 +510,7 @@ func check_handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func index_handler(w http.ResponseWriter, r *http.Request) {
-	indexTemplate.Execute(w, nil)
+	indexTemplate.Execute(w, ScamThreshold)
 }
 func topwidget_handler(w http.ResponseWriter, r *http.Request) {
 	u, p, ok := r.BasicAuth()
