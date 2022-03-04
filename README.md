@@ -1,9 +1,8 @@
 # Installation
 1. ```apt install golang```
-2. ```go get github.com/skip2/go-qrcode```
-3. ```git clone https://git.sr.ht/~anon_/shadowchat```
-4. ```cd shadowchat```
-5. ```go run shadowchat```
+2. ```git clone https://git.sr.ht/~anon_/shadowchat```
+3. ```cd shadowchat```
+4. ```go run .```
 
 A webserver at 127.0.0.1:8900 is running. Pressing the pay button will result in a 500 Error if the `monero-wallet-rpc` is not running.
 
