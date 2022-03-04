@@ -6,6 +6,7 @@
 5. ```go run shadowchat```
 
 A webserver at 127.0.0.1:8900 is running. Pressing the pay button will result in a 500 Error if the `monero-wallet-rpc` is not running.
+This is designed to be run on a cloud server with nginx proxypass for TLS.
 
 # Monero Setup
 1. Generate a view only wallet using the `monero-wallet-gui` from getmonero.org. Preferably with no password
@@ -15,12 +16,11 @@ A webserver at 127.0.0.1:8900 is running. Pressing the pay button will result in
 
 # Usage
 - Visit 127.0.0.1:8900/view to view your superchat history
-- Paste 127.0.0.1:8900/alert?auth=adminadmin into OBS for an alert box
+- Visit 127.0.0.1:8900/alert?auth=adminadmin to see notifications
 - The default username is `admin` and password `adminadmin`. Change these in `main.go`
 
-## OBS
+# OBS
 - Add a Browser source in obs and point it to `https://example.com/alert?auth=adminadmin`
-
 # Future plans
 - Use settings file instead of editing source
 - Settings page for on-the-fly changes (minimum dono amount, hide all amounts, etc.)
