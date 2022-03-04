@@ -11,12 +11,15 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 	"text/template"
 	"unicode/utf8"
 
 	qrcode "github.com/skip2/go-qrcode"
 )
+
+const unicodeBlankSpace string = "⠀" // unicode blank space because discord doesnt accept empty messages
 
 var discordURI string = ""        // Paste discord webhook url. (removing discord feature in the future)
 var DiscordAvatar string = ""     // URL to image to use as discord avatar
@@ -165,12 +168,12 @@ type GetTransfersResponse struct {
 }
 
 func main() {
-	http.HandleFunc("/", index_handler)
-	http.HandleFunc("/pay", payment_handler)
-	http.HandleFunc("/check", check_handler)
-	http.HandleFunc("/alert", alert_handler)
-	http.HandleFunc("/view", view_handler)
-	http.HandleFunc("/top", topwidget_handler)
+	http.HandleFunc("/", indexHandler)
+	http.HandleFunc("/pay", paymentHandler)
+	http.HandleFunc("/check", checkHandler)
+	http.HandleFunc("/alert", alertHandler)
+	http.HandleFunc("/view", viewHandler)
+	http.HandleFunc("/top", topwidgetHandler)
 
 	os.OpenFile("log/paid.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	os.OpenFile("log/alertqueue.csv", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
@@ -204,7 +207,7 @@ func reverse(ss []string) {
 	}
 }
 
-func view_handler(w http.ResponseWriter, r *http.Request) {
+func viewHandler(w http.ResponseWriter, r *http.Request) {
 	var a viewPageData
 	var displayTemp string
 
@@ -244,8 +247,7 @@ func view_handler(w http.ResponseWriter, r *http.Request) {
 	viewTemplate.Execute(w, a)
 }
 
-func check_handler(w http.ResponseWriter, r *http.Request) {
-
+func checkHandler(w http.ResponseWriter, r *http.Request) {
 	payload := strings.NewReader(`{"jsonrpc":"2.0","id":"0","method":"get_address"}`)
 	req, _ := http.NewRequest("POST", rpcURL, payload)
 	req.Header.Set("Content-Type", "application/json")
@@ -298,7 +300,7 @@ func check_handler(w http.ResponseWriter, r *http.Request) {
 					logged = true
 				}
 			}
-			if logged == false {
+			if !logged {
 
 				f, err := os.OpenFile("log/paid.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 				if err != nil {
@@ -321,7 +323,7 @@ func check_handler(w http.ResponseWriter, r *http.Request) {
 					c.Media = ""
 				}
 				if c.Msg == "" {
-					c.Msg = "⠀"
+					c.Msg = unicodeBlankSpace
 				}
 				if c.Received >= ScamThreshold {
 					if StreamlabsKey != "" {
@@ -383,7 +385,7 @@ func check_handler(w http.ResponseWriter, r *http.Request) {
 			} else {
 				c.Received = 0.000
 			}
-			if logged == true {
+			if logged {
 				c.Receipt = "Found old payment"
 				c.Meta = ""
 			}
@@ -414,7 +416,7 @@ func check_handler(w http.ResponseWriter, r *http.Request) {
 					logged = true
 				}
 			}
-			if logged == false {
+			if !logged {
 
 				f, err := os.OpenFile("log/paid.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 				if err != nil {
@@ -426,7 +428,7 @@ func check_handler(w http.ResponseWriter, r *http.Request) {
 				}
 
 				c.Meta = ""
-				c.Receipt = string(tx.Amount) + "Payment received! It is safe to close the tab"
+				c.Receipt = strconv.FormatInt(tx.Amount, 10) + "Payment received! It is safe to close the tab"
 				c.Received = float64(tx.Amount) / 1000000000000
 				if c.Received < ScamThreshold {
 					c.Receipt = "<b style='color:red'>Scammed! " + fmt.Sprint(c.Received) + " is below minimum</b>"
@@ -438,7 +440,7 @@ func check_handler(w http.ResponseWriter, r *http.Request) {
 					c.Media = "" // remove media if chatter didnt pay the minimum
 				}
 				if c.Msg == "" {
-					c.Msg = "⠀" // unicode blank space because discord doesnt accept empty messages
+					c.Msg = unicodeBlankSpace
 				}
 				if c.Received >= ScamThreshold {
 
@@ -500,7 +502,7 @@ func check_handler(w http.ResponseWriter, r *http.Request) {
 			} else {
 				c.Received = 0.000
 			}
-			if logged == true {
+			if logged {
 				c.Receipt = "Found old payment"
 				c.Meta = ""
 			}
@@ -509,10 +511,10 @@ func check_handler(w http.ResponseWriter, r *http.Request) {
 	checkTemplate.Execute(w, c)
 }
 
-func index_handler(w http.ResponseWriter, r *http.Request) {
+func indexHandler(w http.ResponseWriter, r *http.Request) {
 	indexTemplate.Execute(w, ScamThreshold)
 }
-func topwidget_handler(w http.ResponseWriter, r *http.Request) {
+func topwidgetHandler(w http.ResponseWriter, r *http.Request) {
 	u, p, ok := r.BasicAuth()
 	if !ok {
 		w.Header().Add("WWW-Authenticate", `Basic realm="Give username and password"`)
@@ -540,7 +542,7 @@ func topwidget_handler(w http.ResponseWriter, r *http.Request) {
 	topwidgetTemplate.Execute(w, nil)
 }
 
-func alert_handler(w http.ResponseWriter, r *http.Request) {
+func alertHandler(w http.ResponseWriter, r *http.Request) {
 	var v csvLog
 	v.Refresh = AlertWidgetRefreshInterval
 	if r.FormValue("auth") == password {
@@ -578,7 +580,7 @@ func alert_handler(w http.ResponseWriter, r *http.Request) {
 	alertTemplate.Execute(w, v)
 }
 
-func payment_handler(w http.ResponseWriter, r *http.Request) {
+func paymentHandler(w http.ResponseWriter, r *http.Request) {
 
 	payload := strings.NewReader(`{"jsonrpc":"2.0","id":"0","method":"make_integrated_address"}`)
 	req, err := http.NewRequest("POST", rpcURL, payload)
