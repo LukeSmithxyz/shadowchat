@@ -1,3 +1,10 @@
+# Shadowchat
+- Self-hosted, non-custodial and minimalist Monero (XMR) superchat system written in Go.
+- Provides an admin view page to see donations with corresponding comments.
+- Provides notification methods usable in OBS with an HTML page.
+
+To see a working instance of shadowchat, see [xmr.lukesmith.xyz](https://xmr.lukesmith.xyz).
+
 # Installation
 1. ```apt install golang```
 2. ```go get github.com/skip2/go-qrcode```
@@ -33,6 +40,3 @@ This comes from [https://git.sr.ht/~anon_/shadowchat](https://git.sr.ht/~anon_/s
 ### Donate
 sir,,thank you
 `84U6xHT7KVaWqdKwc7LiwkAXKCS2f2g6b6SFyt1G7u6xWqLBYTVXH2aEsEPho64uPFJQS6KHqSg7XLEfEkqvjdgd9H1vQSm`
-
-### Example
-To see a working instance of shadowchat, see [xmr.lukesmith.xyz](https://xmr.lukesmith.xyz).
