@@ -26,3 +26,7 @@ A webserver at 127.0.0.1:8900 is running. Pressing the pay button will result in
 
 # License
 GPLv3
+
+### Donate
+sir,,thank you
+`84U6xHT7KVaWqdKwc7LiwkAXKCS2f2g6b6SFyt1G7u6xWqLBYTVXH2aEsEPho64uPFJQS6KHqSg7XLEfEkqvjdgd9H1vQSm`
