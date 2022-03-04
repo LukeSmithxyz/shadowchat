@@ -18,11 +18,15 @@ A webserver at 127.0.0.1:8900 is running. Pressing the pay button will result in
 - Paste 127.0.0.1:8900/alert?auth=adminadmin into OBS for an alert box
 - The default username is `admin` and password `adminadmin`. Change these in `main.go`
 
+## OBS
+- Add a Browser source in obs and point it to `https://example.com/alert?auth=adminadmin`
+
 # Future plans
 - Use settings file instead of editing source
 - Settings page for on-the-fly changes (minimum dono amount, hide all amounts, etc.)
 - Blocklist for naughty words
 - Widget for OBS displaying top donators
+- Remove discord and streamlabs integration features
 
 # License
 GPLv3
