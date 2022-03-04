@@ -18,13 +18,13 @@ import (
 	qrcode "github.com/skip2/go-qrcode"
 )
 
-var discordURI string = ""        // Paste discord webhook url
+var discordURI string = ""        // Paste discord webhook url. (removing discord feature in the future)
 var DiscordAvatar string = ""     // URL to image to use as discord avatar
 var ScamThreshold float64 = 0.005 // MINIMUM DONATION AMOUNT
 var MediaMin float64 = 0.025      // Currently unused
 var MessageMaxChar int = 250
 var NameMaxChar int = 25
-var StreamlabsKey string = "" // Refer to instructions on how to get this key.
+var StreamlabsKey string = "" // Removing streamlabs feature in the future
 var rpcURL string = "http://127.0.0.1:28088/json_rpc"
 var username string = "admin"                // chat log /view page
 var AlertWidgetRefreshInterval string = "10" //seconds
