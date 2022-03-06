@@ -69,7 +69,7 @@ svg {
   <label for="name">Name:</label><br>
   <input placeholder="Anonymous" type="text" id="name" name="name" maxlength="25" ><br>
   <label for="amount">Amount:</label><br>
-  <input type="number" id="amount" name="amount" step="0.0001" min="{{.}}"placeholder="0.005 Minimum">
+  <input type="number" id="amount" name="amount" step="0.0001" min="{{.}}"placeholder="{{.}} Minimum">
   <label for="message">Message:</label><br>
   <textarea id="message" name="message" placeholder="250 character max" cols="50" rows="6" maxlength="250"></textarea><br>
   <button id="submit" type="submit">
