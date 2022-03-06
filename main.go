@@ -300,7 +300,7 @@ func view_handler(w http.ResponseWriter, r *http.Request) {
 			a.Message = append(a.Message, line[2])
 			a.Amount = append(a.Amount, line[3])
 			displayTemp = fmt.Sprintf("<h3><b>%s</b> sent <b>%s</b> XMR:</h3><p>%s</p>", html.EscapeString(line[1]), html.EscapeString(line[3]), line[2])
-			a.Display = append(a.Display, displayTemp) //fmt.Println(line[0] + " " + line[1] + " " + line[2] + " " + line[3])
+			a.Display = append(a.Display, displayTemp)
 		}
 
 	} else {
@@ -308,8 +308,6 @@ func view_handler(w http.ResponseWriter, r *http.Request) {
 		return // return http 401 unauthorized error
 	}
 	reverse(a.Display)
-	//t := time.Now() //It will return time.Time object with current timestamp
-	//fmt.Println(t.Format("2006-01-02 10:04:05"))
 	viewTemplate.Execute(w, a)
 }
 
@@ -367,7 +365,7 @@ func check_handler(w http.ResponseWriter, r *http.Request) {
 					logged = true
 				}
 			}
-			if logged == false {
+			if !logged {
 
 				f, err := os.OpenFile("log/paid.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 				if err != nil {
@@ -455,7 +453,7 @@ func check_handler(w http.ResponseWriter, r *http.Request) {
 			} else {
 				c.Received = 0.000
 			}
-			if logged == true {
+			if logged {
 				c.Receipt = "Found old payment"
 				c.Meta = ""
 			}
@@ -486,7 +484,7 @@ func check_handler(w http.ResponseWriter, r *http.Request) {
 					logged = true
 				}
 			}
-			if logged == false {
+			if !logged {
 
 				f, err := os.OpenFile("log/paid.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 				if err != nil {
@@ -575,7 +573,7 @@ func check_handler(w http.ResponseWriter, r *http.Request) {
 			} else {
 				c.Received = 0.000
 			}
-			if logged == true {
+			if logged {
 				c.Receipt = "Found old payment"
 				c.Meta = ""
 			}
