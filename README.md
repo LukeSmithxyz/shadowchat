@@ -3,7 +3,7 @@
 2. ```go get github.com/skip2/go-qrcode```
 3. ```git clone https://git.sr.ht/~anon_/shadowchat```
 4. ```cd shadowchat```
-5. ```go run shadowchat```
+5. ```go run main.go```
 
 A webserver at 127.0.0.1:8900 is running. Pressing the pay button will result in a 500 Error if the `monero-wallet-rpc` is not running.
 This is designed to be run on a cloud server with nginx proxypass for TLS.
