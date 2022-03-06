@@ -684,7 +684,7 @@ func payment_handler(w http.ResponseWriter, r *http.Request) {
 			params := url.Values{}
 			params.Add("id", resp.Result.PaymentID)
 			params.Add("name", s.Name)
-			params.Add("msg", condenseSpaces(r.FormValue("message")))
+			params.Add("msg", r.FormValue("message"))
 			params.Add("media", condenseSpaces(s.Media))
 			params.Add("hide", html.EscapeString(r.FormValue("hidden")))
 			s.CheckURL = params.Encode()
