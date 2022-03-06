@@ -21,7 +21,7 @@ import (
 )
 
 var discordURI string = ""        // Paste discord webhook url. (removing discord feature in the future)
-var DiscordAvatar string = ""     // URL to image to use as discord avatar
+var DiscordAvatar string = ""     // URL of image to use as discord avatar
 var ScamThreshold float64 = 0.005 // MINIMUM DONATION AMOUNT
 var MediaMin float64 = 0.025      // Currently unused
 var MessageMaxChar int = 250
@@ -430,6 +430,9 @@ func check_handler(w http.ResponseWriter, r *http.Request) {
 					}
 					defer f.Close()
 					csvAppend := fmt.Sprintf(`"%s","%s","%s","%s"`, c.PayID, html.EscapeString(c.Name), html.EscapeString(c.Msg), fmt.Sprint(c.Received))
+					if r.FormValue("hide") == "true" {
+						csvAppend = fmt.Sprintf(`"%s","%s","%s","%s (?)"`, c.PayID, html.EscapeString(c.Name), html.EscapeString(c.Msg), fmt.Sprint(c.Received))
+					}
 					a, err := os.OpenFile("log/alertqueue.csv",
 						os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 					if err != nil {
@@ -447,7 +450,11 @@ func check_handler(w http.ResponseWriter, r *http.Request) {
 						log.Println(err)
 					}
 					if enableEmail {
-						mail(c.Name, fmt.Sprint(c.Received), c.Msg)
+						if r.FormValue("hide") == "true" {
+							mail(c.Name, fmt.Sprint(c.Received)+" (?)", c.Msg)
+						} else {
+							mail(c.Name, fmt.Sprint(c.Received), c.Msg)
+						}
 					}
 				}
 			} else {
@@ -550,6 +557,9 @@ func check_handler(w http.ResponseWriter, r *http.Request) {
 					}
 					defer f.Close()
 					csvAppend := fmt.Sprintf(`"%s","%s","%s","%s"`, c.PayID, html.EscapeString(c.Name), html.EscapeString(c.Msg), fmt.Sprint(c.Received))
+					if r.FormValue("hide") == "true" {
+						csvAppend = fmt.Sprintf(`"%s","%s","%s","%s (?)"`, c.PayID, html.EscapeString(c.Name), html.EscapeString(c.Msg), fmt.Sprint(c.Received))
+					}
 					a, err := os.OpenFile("log/alertqueue.csv",
 						os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 					if err != nil {
@@ -567,7 +577,11 @@ func check_handler(w http.ResponseWriter, r *http.Request) {
 						log.Println(err)
 					}
 					if enableEmail {
-						mail(c.Name, fmt.Sprint(c.Received), c.Msg)
+						if r.FormValue("hide") == "true" {
+							mail(c.Name, fmt.Sprint(c.Received)+" (?)", c.Msg)
+						} else {
+							mail(c.Name, fmt.Sprint(c.Received), c.Msg)
+						}
 					}
 				}
 			} else {
