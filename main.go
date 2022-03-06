@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"html"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/smtp"
@@ -48,6 +49,22 @@ var checkTemplate *template.Template
 var alertTemplate *template.Template
 var viewTemplate *template.Template
 var topwidgetTemplate *template.Template
+
+type configJson struct {
+	MinimumDonation  float64  `json:"MinimumDonation"`
+	MaxMessageChars  int      `json:"MaxMessageChars"`
+	MaxNameChars     int      `json:"MaxNameChars"`
+	RPCWalletURL     string   `json:"RPCWalletURL"`
+	WebViewUsername  string   `json:"WebViewUsername"`
+	WebViewPassword  string   `json:"WebViewPassword"`
+	OBSWidgetRefresh string   `json:"OBSWidgetRefresh"`
+	EnableEmail      bool     `json:"EnableEmail"`
+	SMTPServer       string   `json:"SMTPServer"`
+	SMTPPort         string   `json:"SMTPPort"`
+	SMTPUser         string   `json:"SMTPUser"`
+	SMTPPass         string   `json:"SMTPPass"`
+	SendToEmail      []string `json:"SendToEmail"`
+}
 
 type checkPage struct {
 	Addy     string
@@ -174,6 +191,33 @@ type GetTransfersResponse struct {
 }
 
 func main() {
+	jsonFile, err := os.Open("config.json")
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println("reading config.json")
+	defer jsonFile.Close()
+	byteValue, _ := ioutil.ReadAll(jsonFile)
+	var conf configJson
+	json.Unmarshal(byteValue, &conf)
+
+	ScamThreshold = conf.MinimumDonation
+	MessageMaxChar = conf.MaxMessageChars
+	NameMaxChar = conf.MaxNameChars
+	rpcURL = conf.RPCWalletURL
+	username = conf.WebViewUsername
+	password = conf.WebViewPassword
+	AlertWidgetRefreshInterval = conf.OBSWidgetRefresh
+	enableEmail = conf.EnableEmail
+	smtpHost = conf.SMTPServer
+	smtpPort = conf.SMTPPort
+	smtpUser = conf.SMTPUser
+	smtpPass = conf.SMTPPass
+	sendTo = conf.SendToEmail
+
+	fmt.Println(fmt.Sprintf("email notifications enabled?: %t", enableEmail))
+	fmt.Println(fmt.Sprintf("OBS Alert path: /alert?auth=%s", password))
+
 	http.HandleFunc("/", index_handler)
 	http.HandleFunc("/pay", payment_handler)
 	http.HandleFunc("/check", check_handler)
@@ -626,7 +670,6 @@ func payment_handler(w http.ResponseWriter, r *http.Request) {
 			s.Amount = html.EscapeString(r.FormValue("amount"))
 			if r.FormValue("amount") == "" {
 				s.Amount = fmt.Sprint(ScamThreshold)
-				fmt.Println(ScamThreshold)
 			}
 			if r.FormValue("name") == "" {
 				s.Name = "Anonymous"
