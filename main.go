@@ -9,6 +9,7 @@ import (
 	"html"
 	"log"
 	"net/http"
+	"net/smtp"
 	"net/url"
 	"os"
 	"strings"
@@ -32,6 +33,14 @@ var AlertWidgetRefreshInterval string = "10" //seconds
 // this is the password for both the /view page and the OBS /alert page
 // example OBS url: https://example.com/alert?auth=adminadmin
 var password string = "adminadmin"
+
+// Email settings
+var enableEmail bool = false
+var smtpHost string = "smtp.purelymail.com"
+var smtpPort string = "587"
+var smtpUser string = "example@purelymail.com"
+var smtpPass string = "[y7EQ(xgTW_~{CUpPhO6(#"
+var sendTo = []string{"example@purelymail.com"} // Comma separated recipient list
 
 var indexTemplate *template.Template
 var payTemplate *template.Template
@@ -172,6 +181,7 @@ func main() {
 	http.HandleFunc("/view", view_handler)
 	http.HandleFunc("/top", topwidget_handler)
 
+	// Create files if they dont exist
 	os.OpenFile("log/paid.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	os.OpenFile("log/alertqueue.csv", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	os.OpenFile("log/superchats.csv", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
@@ -183,6 +193,21 @@ func main() {
 	viewTemplate, _ = template.ParseFiles("web/view.html")
 	topwidgetTemplate, _ = template.ParseFiles("web/top.html")
 	http.ListenAndServe(":8900", nil)
+}
+func mail(name string, amount string, message string) {
+
+	body := []byte(fmt.Sprintf("From: %s\n"+
+		"Subject: %s sent %s XMR\n\n"+
+		"%s", smtpUser, name, amount, message))
+
+	auth := smtp.PlainAuth("", smtpUser, smtpPass, smtpHost)
+
+	err := smtp.SendMail(smtpHost+":"+smtpPort, auth, smtpUser, sendTo, body)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println("email sent")
 }
 
 func condenseSpaces(s string) string {
@@ -379,6 +404,9 @@ func check_handler(w http.ResponseWriter, r *http.Request) {
 					if _, err := a.WriteString(csvAppend + "\n"); err != nil {
 						log.Println(err)
 					}
+					if enableEmail {
+						mail(c.Name, fmt.Sprint(c.Received), c.Msg)
+					}
 				}
 			} else {
 				c.Received = 0.000
@@ -495,6 +523,9 @@ func check_handler(w http.ResponseWriter, r *http.Request) {
 					}
 					if _, err := a.WriteString(csvAppend + "\n"); err != nil {
 						log.Println(err)
+					}
+					if enableEmail {
+						mail(c.Name, fmt.Sprint(c.Received), c.Msg)
 					}
 				}
 			} else {
