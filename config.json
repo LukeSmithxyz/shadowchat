@@ -1,6 +1,6 @@
 {
 	"MinimumDonation":0.005,
-	"MaxMessageChars":250,
+	"MaxMessageChars":300,
 	"MaxNameChars":25,
 	"RPCWalletURL":"http://127.0.0.1:28088/json_rpc",
 	"WebViewUsername":"admin",
