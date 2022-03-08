@@ -97,6 +97,11 @@ type csvLog struct {
 	Refresh       string
 }
 
+type indexDisplay struct {
+	MaxChar int
+	MinAmnt float64
+}
+
 type viewPageData struct {
 	ID      []string
 	Name    []string
@@ -597,7 +602,10 @@ func check_handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func index_handler(w http.ResponseWriter, r *http.Request) {
-	indexTemplate.Execute(w, ScamThreshold)
+	var i indexDisplay
+	i.MaxChar = MessageMaxChar
+	i.MinAmnt = ScamThreshold
+	indexTemplate.Execute(w, i)
 }
 func topwidget_handler(w http.ResponseWriter, r *http.Request) {
 	u, p, ok := r.BasicAuth()

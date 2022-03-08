@@ -23,7 +23,7 @@ button,input,textarea {
   outline: none;
   padding-left: 8px;
   padding-right: 6px;
-  max-height: 150px;
+  max-height: 200px;
   font-size: 16px;
   margin: 6px;
   width: 100%
@@ -69,9 +69,9 @@ svg {
   <label for="name">Name:</label><br>
   <input placeholder="Anonymous" type="text" id="name" name="name" maxlength="25" ><br>
   <label for="amount">Amount:</label><br>
-  <input type="number" id="amount" name="amount" step="0.0001" min="{{.}}"placeholder="{{.}} Minimum">
+  <input type="number" id="amount" name="amount" step="0.0001" min="{{.MinAmnt}}"placeholder="{{.MinAmnt}} Minimum">
   <label for="message">Message:</label><br>
-  <textarea id="message" name="message" placeholder="250 character max" cols="50" rows="6" maxlength="250"></textarea><br>
+  <textarea id="message" name="message" placeholder="{{.MaxChar}} character max" rows="6" maxlength="{{.MaxChar}}"></textarea><br>
   <button id="submit" type="submit">
   <svg version="1.1" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve"><g>
   <path fill="white" d="M256,0C114.4,0,0,114.6,0,256.3c0,28.5,4.8,55.6,13.2,81.2h76.3V122.2L256,289l166.5-166.8v215.3h76.3
