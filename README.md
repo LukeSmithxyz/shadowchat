@@ -7,10 +7,12 @@ To see a working instance of shadowchat, see [xmr.lukesmith.xyz](https://xmr.luk
 
 # Installation
 1. ```apt install golang```
-2. ```go get github.com/skip2/go-qrcode```
-3. ```git clone https://git.sr.ht/~anon_/shadowchat```
+2. ```git clone https://git.sr.ht/~anon_/shadowchat```
 4. ```cd shadowchat```
-5. ```go run main.go```
+2. ```go get github.com/skip2/go-qrcode```
+5. ```go mod init local.lan && go mod tidy```
+6. edit ```config.json```
+7. ```go run main.go```
 
 A webserver at 127.0.0.1:8900 is running. Pressing the pay button will result in a 500 Error if the `monero-wallet-rpc` is not running.
 This is designed to be run on a cloud server with nginx proxypass for TLS.
