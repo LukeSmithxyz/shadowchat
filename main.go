@@ -34,6 +34,7 @@ var AlertWidgetRefreshInterval string = "10" //seconds
 // this is the password for both the /view page and the OBS /alert page
 // example OBS url: https://example.com/alert?auth=adminadmin
 var password string = "adminadmin"
+var checked string = ""
 
 // Email settings
 var enableEmail bool = false
@@ -58,6 +59,7 @@ type configJson struct {
 	WebViewUsername  string   `json:"WebViewUsername"`
 	WebViewPassword  string   `json:"WebViewPassword"`
 	OBSWidgetRefresh string   `json:"OBSWidgetRefresh"`
+	Checked          bool     `json:"ShowAmountCheckedByDefault"`
 	EnableEmail      bool     `json:"EnableEmail"`
 	SMTPServer       string   `json:"SMTPServer"`
 	SMTPPort         string   `json:"SMTPPort"`
@@ -100,6 +102,7 @@ type csvLog struct {
 type indexDisplay struct {
 	MaxChar int
 	MinAmnt float64
+	Checked string
 }
 
 type viewPageData struct {
@@ -219,6 +222,9 @@ func main() {
 	smtpUser = conf.SMTPUser
 	smtpPass = conf.SMTPPass
 	sendTo = conf.SendToEmail
+	if conf.Checked == true {
+		checked = " checked"
+	}
 
 	fmt.Println(fmt.Sprintf("email notifications enabled?: %t", enableEmail))
 	fmt.Println(fmt.Sprintf("OBS Alert path: /alert?auth=%s", password))
@@ -435,8 +441,8 @@ func check_handler(w http.ResponseWriter, r *http.Request) {
 					}
 					defer f.Close()
 					csvAppend := fmt.Sprintf(`"%s","%s","%s","%s"`, c.PayID, html.EscapeString(c.Name), html.EscapeString(c.Msg), fmt.Sprint(c.Received))
-					if r.FormValue("hide") == "true" {
-						csvAppend = fmt.Sprintf(`"%s","%s","%s","%s (?)"`, c.PayID, html.EscapeString(c.Name), html.EscapeString(c.Msg), fmt.Sprint(c.Received))
+					if r.FormValue("show") != "true" {
+						csvAppend = fmt.Sprintf(`"%s","%s","%s","%s (hidden)"`, c.PayID, html.EscapeString(c.Name), html.EscapeString(c.Msg), fmt.Sprint(c.Received))
 					}
 					a, err := os.OpenFile("log/alertqueue.csv",
 						os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
@@ -448,15 +454,15 @@ func check_handler(w http.ResponseWriter, r *http.Request) {
 					if _, err := f.WriteString(csvAppend + "\n"); err != nil {
 						log.Println(err)
 					}
-					if r.FormValue("hide") == "true" {
+					if r.FormValue("show") != "true" {
 						csvAppend = fmt.Sprintf(`"%s","%s","%s","???"`, c.PayID, html.EscapeString(c.Name), html.EscapeString(c.Msg))
 					}
 					if _, err := a.WriteString(csvAppend + "\n"); err != nil {
 						log.Println(err)
 					}
 					if enableEmail {
-						if r.FormValue("hide") == "true" {
-							mail(c.Name, fmt.Sprint(c.Received)+" (?)", c.Msg)
+						if r.FormValue("show") != "true" {
+							mail(c.Name, fmt.Sprint(c.Received)+" (hidden)", c.Msg)
 						} else {
 							mail(c.Name, fmt.Sprint(c.Received), c.Msg)
 						}
@@ -562,8 +568,8 @@ func check_handler(w http.ResponseWriter, r *http.Request) {
 					}
 					defer f.Close()
 					csvAppend := fmt.Sprintf(`"%s","%s","%s","%s"`, c.PayID, html.EscapeString(c.Name), html.EscapeString(c.Msg), fmt.Sprint(c.Received))
-					if r.FormValue("hide") == "true" {
-						csvAppend = fmt.Sprintf(`"%s","%s","%s","%s (?)"`, c.PayID, html.EscapeString(c.Name), html.EscapeString(c.Msg), fmt.Sprint(c.Received))
+					if r.FormValue("show") != "true" {
+						csvAppend = fmt.Sprintf(`"%s","%s","%s","%s (hidden)"`, c.PayID, html.EscapeString(c.Name), html.EscapeString(c.Msg), fmt.Sprint(c.Received))
 					}
 					a, err := os.OpenFile("log/alertqueue.csv",
 						os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
@@ -575,15 +581,15 @@ func check_handler(w http.ResponseWriter, r *http.Request) {
 					if _, err := f.WriteString(csvAppend + "\n"); err != nil {
 						log.Println(err)
 					}
-					if r.FormValue("hide") == "true" {
+					if r.FormValue("show") != "true" {
 						csvAppend = fmt.Sprintf(`"%s","%s","%s","???"`, c.PayID, html.EscapeString(c.Name), html.EscapeString(c.Msg))
 					}
 					if _, err := a.WriteString(csvAppend + "\n"); err != nil {
 						log.Println(err)
 					}
 					if enableEmail {
-						if r.FormValue("hide") == "true" {
-							mail(c.Name, fmt.Sprint(c.Received)+" (?)", c.Msg)
+						if r.FormValue("show") != "true" {
+							mail(c.Name, fmt.Sprint(c.Received)+" (hidden)", c.Msg)
 						} else {
 							mail(c.Name, fmt.Sprint(c.Received), c.Msg)
 						}
@@ -605,6 +611,7 @@ func index_handler(w http.ResponseWriter, r *http.Request) {
 	var i indexDisplay
 	i.MaxChar = MessageMaxChar
 	i.MinAmnt = ScamThreshold
+	i.Checked = checked
 	indexTemplate.Execute(w, i)
 }
 func topwidget_handler(w http.ResponseWriter, r *http.Request) {
@@ -706,7 +713,7 @@ func payment_handler(w http.ResponseWriter, r *http.Request) {
 			params.Add("name", s.Name)
 			params.Add("msg", r.FormValue("message"))
 			params.Add("media", condenseSpaces(s.Media))
-			params.Add("hide", html.EscapeString(r.FormValue("hidden")))
+			params.Add("show", html.EscapeString(r.FormValue("showAmount")))
 			s.CheckURL = params.Encode()
 
 			tmp, _ := qrcode.Encode(fmt.Sprintf("monero:%s?tx_amount=%s", resp.Result.IntegratedAddress, s.Amount), qrcode.Low, 320)

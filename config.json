@@ -6,6 +6,7 @@
 	"WebViewUsername":"admin",
 	"WebViewPassword":"adminadmin",
 	"OBSWidgetRefresh":"10",
+	"ShowAmountCheckedByDefault":true,
 	"EnableEmail":false,
 	"SMTPServer":"smtp.purelymail.com",
 	"SMTPPort":"587",
