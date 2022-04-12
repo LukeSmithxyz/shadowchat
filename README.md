@@ -20,6 +20,7 @@ This is designed to be run on a cloud server with nginx proxypass for TLS.
 - Visit 127.0.0.1:8900/view to view your superchat history
 - Visit 127.0.0.1:8900/alert?auth=adminadmin to see notifications
 - The default username is `admin` and password `adminadmin`. Change these in `main.go`
+- Edit web/index.html and web/style.css to customize your front page!
 
 # OBS
 - Add a Browser source in obs and point it to `https://example.com/alert?auth=adminadmin`
