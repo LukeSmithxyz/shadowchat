@@ -229,6 +229,13 @@ func main() {
 	fmt.Println(fmt.Sprintf("email notifications enabled?: %t", enableEmail))
 	fmt.Println(fmt.Sprintf("OBS Alert path: /alert?auth=%s", password))
 
+	http.HandleFunc("/style.css", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "web/style.css")
+	})
+	http.HandleFunc("/xmr.svg", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "web/xmr.svg")
+	})
+
 	http.HandleFunc("/", index_handler)
 	http.HandleFunc("/pay", payment_handler)
 	http.HandleFunc("/check", check_handler)
