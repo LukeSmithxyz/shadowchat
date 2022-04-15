@@ -3,63 +3,8 @@
 <head>
 <title>Payment</title>
 <link rel=icon href=xmr.svg>
+<link rel=stylesheet href=style.css>
 </head>
-<style>
-body {
-  background: #12151C;
-  text-align: left;
-  color: white;
-  width: 25em;
-  margin: 0 auto;
-  padding-right: 20px;
-  font-family: Arial;
-}
-img {vertical-align: middle}
-@media only screen and (max-device-width: 830px) {
-  body { width: 90%;zoom:2; padding-right: 30px }
-  textarea { height: 72px }
-}
-#message { padding-top: 8px}
-#submit  {
-  background: #004cff;
-  width: 50%;
-  align-items:right;
-  border-radius: 0.125rem;
-}
-::placeholder {
-  color: #70799b;
-  opacity: 1;
-}
-b,a,small {
-  color: #EF4444;
-}
-blockquote {
-  background: #262b3b;
-  border: none;
-  color: white;
-  outline: none;
-  font-size: 16px;
-  padding-left: 14px;
-  padding-right: 14px;
-  padding-top: 7px;
-  min-height: 24px;
-  padding-bottom: 7px;
-  margin: 6px;
-  width: 100%
-  word-break: break-all;
-  word-wrap: break-word;
-}
-iframe {
-  background: #12151C;
-  background-color: #12151C;
-  height: 30px;
-}
-label {
-  -moz-user-select: none;
-  -khtml-user-select: none;
-  -webkit-user-select: none;
-}
-</style>
 <body>
   <h2>Send at least <b>{{.Amount}}</b> XMR to confirm superchat:</h2>
   <label>Name:</label><br>
@@ -80,7 +25,7 @@ label {
   </blockquote>
   <label>Checking for payment (3s)</label><br>
   <blockquote>
-	  <iframe frameBorder="0" scrolling="no" src="/check?{{.CheckURL}}"></iframe>
+    <iframe allowtransparency="true" frameBorder="0" scrolling="no" src="/check?{{.CheckURL}}"></iframe>
   </blockquote>
   <small>You must stay on this screen until transaction is seen. Do not manually refresh this page.</small><br>
 </body>
