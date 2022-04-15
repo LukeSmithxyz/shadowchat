@@ -54,3 +54,30 @@ svg,img {
   vertical-align: middle;
   width: 24px;
 }
+blockquote {
+  background: #262b3b;
+  border: none;
+  color: white;
+  outline: none;
+  font-size: 16px;
+  padding-left: 14px;
+  padding-right: 14px;
+  padding-top: 7px;
+  min-height: 24px;
+  padding-bottom: 7px;
+  margin: 6px;
+  width: 100%
+  word-break: break-all;
+  word-wrap: break-word;
+}
+iframe {
+  height: 30px;
+}
+label {
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+}
+b,a {
+  color: #EF4444;
+}
