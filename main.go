@@ -15,6 +15,7 @@ import (
 	"os"
 	"strings"
 	"text/template"
+	"time"
 	"unicode/utf8"
 
 	qrcode "github.com/skip2/go-qrcode"
@@ -257,10 +258,9 @@ func main() {
 	http.ListenAndServe(":8900", nil)
 }
 func mail(name string, amount string, message string) {
-
 	body := []byte(fmt.Sprintf("From: %s\n"+
-		"Subject: %s sent %s XMR\n\n"+
-		"%s", smtpUser, name, amount, message))
+		"Subject: %s sent %s XMR\nDate: %s\n\n"+
+		"%s", smtpUser, name, amount, fmt.Sprint(time.Now().Format(time.RFC1123Z)), message))
 
 	auth := smtp.PlainAuth("", smtpUser, smtpPass, smtpHost)
 
