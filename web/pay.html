@@ -23,9 +23,9 @@
   <blockquote>
   <img src="data:image/png;base64,{{.QRB64}}"/>
   </blockquote>
-  <label>Checking for payment (3s)</label><br>
+  <label>Checking for payment (every 3 seconds) <a href="/check?{{.CheckURL}}" target="checkframe">Manual check</a></label><br>
   <blockquote>
-    <iframe allowtransparency="true" frameBorder="0" scrolling="no" src="/check?{{.CheckURL}}"></iframe>
+    <iframe allowtransparency="true" name="checkframe" frameBorder="0" scrolling="no" src="/check?{{.CheckURL}}"></iframe>
   </blockquote>
   <small>You must stay on this screen until transaction is seen. Do not manually refresh this page.</small><br>
 </body>
