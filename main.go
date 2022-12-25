@@ -21,13 +21,10 @@ import (
 	qrcode "github.com/skip2/go-qrcode"
 )
 
-var discordURI string = ""        // Paste discord webhook url. (removing discord feature in the future)
-var DiscordAvatar string = ""     // URL of image to use as discord avatar
 var ScamThreshold float64 = 0.005 // MINIMUM DONATION AMOUNT
 var MediaMin float64 = 0.025      // Currently unused
 var MessageMaxChar int = 250
 var NameMaxChar int = 25
-var StreamlabsKey string = "" // Removing streamlabs feature in the future
 var rpcURL string = "http://127.0.0.1:28088/json_rpc"
 var username string = "admin"                // chat log /view page
 var AlertWidgetRefreshInterval string = "10" //seconds
@@ -409,38 +406,6 @@ func check_handler(w http.ResponseWriter, r *http.Request) {
 					c.Msg = "⠀"
 				}
 				if c.Received >= ScamThreshold {
-					if StreamlabsKey != "" {
-						reqm, _ := http.NewRequest("GET", "https://api.coingecko.com/api/v3/simple/price?ids=monero&vs_currencies=usd", nil)
-						reqm.Header.Set("Content-Type", "application/json")
-						xmprice, _ := http.DefaultClient.Do(reqm)
-						resp := &MoneroPrice{}
-						if err := json.NewDecoder(xmprice.Body).Decode(resp); err != nil {
-							fmt.Println(err.Error())
-						}
-
-						sChatPost := url.Values{}
-						sChatPost.Add("name", c.Name)
-						sChatPost.Add("message", c.Msg)
-						sChatPost.Add("identifier", "Anonymous")
-						sChatPost.Add("amount", fmt.Sprint(c.Received*resp.Monero.Usd))
-						sChatPost.Add("currency", "USD")
-						url := fmt.Sprintf(`https://streamlabs.com/api/v1.0/donations?%s`, sChatPost.Encode())
-
-						streamPost, _ := http.NewRequest("POST", url, nil)
-						streamPost.Header.Set("Authorization", StreamlabsKey)
-						_, err := http.DefaultClient.Do(streamPost)
-						if err != nil {
-							fmt.Println(err)
-						}
-					}
-					if discordURI != "" {
-						dcName := fmt.Sprintf("%s sent %s XMR", c.Name, fmt.Sprint(c.Received))
-						json := fmt.Sprintf(`{"username": "%s", "content": "%s","avatar_url":"%s"}`, dcName, c.Msg, DiscordAvatar)
-						dcPayload := strings.NewReader(json)
-						dcReq, _ := http.NewRequest("POST", discordURI, dcPayload)
-						dcReq.Header.Set("Content-Type", "application/json")
-						http.DefaultClient.Do(dcReq)
-					}
 					f, err := os.OpenFile("log/superchats.csv",
 						os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 					if err != nil {
@@ -536,38 +501,6 @@ func check_handler(w http.ResponseWriter, r *http.Request) {
 					c.Msg = "⠀" // unicode blank space because discord doesnt accept empty messages
 				}
 				if c.Received >= ScamThreshold {
-
-					if StreamlabsKey != "" {
-						reqm, _ := http.NewRequest("GET", "https://api.coingecko.com/api/v3/simple/price?ids=monero&vs_currencies=usd", nil)
-						reqm.Header.Set("Content-Type", "application/json")
-						xmprice, _ := http.DefaultClient.Do(reqm)
-						resp := &MoneroPrice{}
-						if err := json.NewDecoder(xmprice.Body).Decode(resp); err != nil {
-							fmt.Println(err.Error())
-						}
-						sChatPost := url.Values{}
-						sChatPost.Add("name", c.Name)
-						sChatPost.Add("message", c.Msg)
-						sChatPost.Add("identifier", "Anonymous")
-						sChatPost.Add("amount", fmt.Sprint(c.Received*resp.Monero.Usd))
-						sChatPost.Add("currency", "USD")
-						url := fmt.Sprintf(`https://streamlabs.com/api/v1.0/donations?%s`, sChatPost.Encode())
-
-						streamPost, _ := http.NewRequest("POST", url, nil)
-						streamPost.Header.Set("Authorization", StreamlabsKey)
-						_, err := http.DefaultClient.Do(streamPost)
-						if err != nil {
-							fmt.Println(err)
-						}
-					}
-					if discordURI != "" {
-						dcName := fmt.Sprintf("%s sent %s XMR", c.Name, fmt.Sprint(c.Received))
-						json := fmt.Sprintf(`{"username": "%s", "content": "%s","avatar_url":"%s"}`, dcName, c.Msg, DiscordAvatar)
-						dcPayload := strings.NewReader(json)
-						dcReq, _ := http.NewRequest("POST", discordURI, dcPayload)
-						dcReq.Header.Set("Content-Type", "application/json")
-						http.DefaultClient.Do(dcReq)
-					}
 					f, err := os.OpenFile("log/superchats.csv",
 						os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 					if err != nil {

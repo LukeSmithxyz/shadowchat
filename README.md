@@ -34,8 +34,7 @@ This is designed to be run on a cloud server with nginx proxypass for TLS.
 # Future plans
 - Blocklist for naughty words
 - Widget for OBS displaying top donators
-- Remove discord and streamlabs integration features
-- Settings page for on-the-fly changes (minimum dono amount, hide all amounts, etc.)
+- Settings page for on-the-fly changes (minimum donation amount, hide all amounts, etc.)
 
 # License
 GPLv3
