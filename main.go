@@ -547,7 +547,7 @@ func check_handler(w http.ResponseWriter, r *http.Request) {
 	checkTemplate.Execute(w, c)
 }
 
-func index_handler(w http.ResponseWriter, r *http.Request) {
+func index_handler(w http.ResponseWriter) {
 	var i indexDisplay
 	i.MaxChar = MessageMaxChar
 	i.MinAmnt = ScamThreshold
