@@ -1,25 +1,26 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>XMR Superchat</title>
-  <link rel=icon href=xmr.svg>
-  <link rel=stylesheet href=style.css>
+    <title>XMR Superchat</title>
+    <link href=xmr.svg rel=icon>
+    <link href=style.css rel=stylesheet>
 </head>
 
 <body>
-  <h2>Superchat with Monero!</h2>
+<h2>Superchat with Monero!</h2>
 
-  <form action="/pay" method="POST">
+<form action="/pay" method="POST">
     <label for="name">Name:</label><br>
-    <input placeholder="Anonymous" type="text" id="name" name="name" maxlength="25"><br>
+    <input id="name" maxlength="25" name="name" placeholder="Anonymous" type="text"><br>
     <label for="amount">Amount:</label><br>
-    <input type="number" id="amount" name="amount" step="0.0001" min="{{.MinAmnt}}" placeholder="{{.MinAmnt}} Minimum">
+    <input id="amount" min="{{.MinAmnt}}" name="amount" placeholder="{{.MinAmnt}} Minimum" step="0.0001" type="number">
     <label for="message">Message:</label><br>
-    <textarea id="message" name="message" placeholder="{{.MaxChar}} character max" rows="6" maxlength="{{.MaxChar}}"></textarea><br>
+    <textarea id="message" maxlength="{{.MaxChar}}" name="message" placeholder="{{.MaxChar}} character max"
+              rows="6"></textarea><br>
     <button id="submit" type="submit"><img src=xmr.svg> Pay</button>
-    <input type="checkbox" id="showAmount" name="showAmount" value="true" {{.Checked}}>
+    <input id="showAmount" name="showAmount" type="checkbox" value="true" {{.Checked}}>
     <small><label for="showAmount">Show amount on stream?</label><small>
-  </form>
+</form>
 </body>
 
 </html>
