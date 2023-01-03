@@ -1,16 +1,18 @@
 {
-	"MinimumDonation":0.005,
-	"MaxMessageChars":300,
-	"MaxNameChars":25,
-	"RPCWalletURL":"http://127.0.0.1:28088/json_rpc",
-	"WebViewUsername":"admin",
-	"WebViewPassword":"adminadmin",
-	"OBSWidgetRefresh":"10",
-	"ShowAmountCheckedByDefault":true,
-	"EnableEmail":false,
-	"SMTPServer":"smtp.purelymail.com",
-	"SMTPPort":"587",
-	"SMTPUser":"example@purelymail.com",
-	"SMTPPass":"123456789",
-	"SendToEmail":["example@purelymail.com"]
+  "MinimumDonation": 0.005,
+  "MaxMessageChars": 300,
+  "MaxNameChars": 25,
+  "RPCWalletURL": "http://127.0.0.1:28088/json_rpc",
+  "WebViewUsername": "admin",
+  "WebViewPassword": "adminadmin",
+  "OBSWidgetRefresh": "10",
+  "ShowAmountCheckedByDefault": true,
+  "EnableEmail": false,
+  "SMTPServer": "smtp.purelymail.com",
+  "SMTPPort": "587",
+  "SMTPUser": "example@purelymail.com",
+  "SMTPPass": "123456789",
+  "SendToEmail": [
+    "example@purelymail.com"
+  ]
 }
