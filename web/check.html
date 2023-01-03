@@ -1,23 +1,29 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Check</title>
-{{.Meta}}
-<style>
-body {
-  background: none transparent;
-  text-align: left;
-  color: white;
-  font-family: Arial;
-  font-size: 16px
-}
-@media only screen and (max-device-width: 830px) {
-  body { zoom: 1.2 }
-}
-b { color: #10B981 }
-</style>
+    <title>Check</title>
+    {{.Meta}}
+    <style>
+        body {
+            background: none transparent;
+            text-align: left;
+            color: white;
+            font-family: Arial;
+            font-size: 16px
+        }
+
+        @media only screen and (max-device-width: 830px) {
+            body {
+                zoom: 1.2
+            }
+        }
+
+        b {
+            color: #10B981
+        }
+    </style>
 </head>
 <body>
-  {{.Receipt}}
+{{.Receipt}}
 </body>
 </html>
