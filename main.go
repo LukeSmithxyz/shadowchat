@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"html"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"net/smtp"
@@ -203,7 +203,7 @@ func main() {
 	}
 	fmt.Println("reading config.json")
 	defer jsonFile.Close()
-	byteValue, _ := ioutil.ReadAll(jsonFile)
+	byteValue, _ := io.ReadAll(jsonFile)
 	var conf configJson
 	json.Unmarshal(byteValue, &conf)
 
