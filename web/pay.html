@@ -1,32 +1,34 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Payment</title>
-<link rel=icon href=xmr.svg>
-<link rel=stylesheet href=style.css>
+    <title>Payment</title>
+    <link href=xmr.svg rel=icon>
+    <link href=style.css rel=stylesheet>
 </head>
 <body>
-  <h2>Send at least <b>{{.Amount}}</b> XMR to confirm superchat:</h2>
-  <label>Name:</label><br>
-  <blockquote>
+<h2>Send at least <b>{{.Amount}}</b> XMR to confirm superchat:</h2>
+<label>Name:</label><br>
+<blockquote>
     {{.Name}}
-  </blockquote>
-  <label>Message:</label><br>
-  <blockquote>
+</blockquote>
+<label>Message:</label><br>
+<blockquote>
     {{.Message}}
-  </blockquote>
-  <label>Payment Address</label><br>
-  <blockquote style="user-select: all">
+</blockquote>
+<label>Payment Address</label><br>
+<blockquote style="user-select: all">
     {{.Address}}
-  </blockquote>
-  <label>Or scan:</label><br>
-  <blockquote>
-  <img src="data:image/png;base64,{{.QRB64}}"/>
-  </blockquote>
-  <label>Checking for payment (every 3 seconds) <a href="/check?{{.CheckURL}}" target="checkframe">Manual check</a></label><br>
-  <blockquote>
-    <iframe allowtransparency="true" name="checkframe" frameBorder="0" scrolling="no" src="/check?{{.CheckURL}}"></iframe>
-  </blockquote>
-  <small>You must stay on this screen until transaction is seen. Do not manually refresh this page.</small><br>
+</blockquote>
+<label>Or scan:</label><br>
+<blockquote>
+    <img src="data:image/png;base64,{{.QRB64}}"/>
+</blockquote>
+<label>Checking for payment (every 3 seconds) <a href="/check?{{.CheckURL}}" target="checkframe">Manual
+    check</a></label><br>
+<blockquote>
+    <iframe allowtransparency="true" frameBorder="0" name="checkframe" scrolling="no"
+            src="/check?{{.CheckURL}}"></iframe>
+</blockquote>
+<small>You must stay on this screen until transaction is seen. Do not manually refresh this page.</small><br>
 </body>
 </html>
