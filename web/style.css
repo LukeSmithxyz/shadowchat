@@ -5,11 +5,11 @@ body {
     width: 25em;
     margin: 0 auto;
     padding-right: 20px;
-    font-family: Arial;
+    font-family: Arial, serif;
 }
 
 button, input, textarea {
-    font-family: Arial;
+    font-family: Arial, serif;
     background: #262b3b;
     border: none;
     color: white;
@@ -85,7 +85,7 @@ blockquote {
     min-height: 24px;
     padding-bottom: 7px;
     margin: 6px;
-    width: 100%
+    width: 100%;
     word-break: break-all;
     word-wrap: break-word;
 }
