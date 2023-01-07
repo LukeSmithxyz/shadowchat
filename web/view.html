@@ -1,45 +1,54 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Superchat Log</title>
-<link rel="icon" href="">
-<style>
-body {
-  background: #12151C;
-  text-align: left;
-  color: white;
-  margin: none;
-  padding: none;
-  font-family: Arial;
-  font-size: 16px
-}
-@media only screen and (max-device-widtd: 830px) {
-  body { zoom: 1.5 }
-}
-b { color: #10B981 }
-h1,h2,h3 {
-  margin: 0;
-}
-p {
-  padding-left: 15px;
-  margin: 0;
-}
-blockquote {
-  background: #262b3b;
-  color: white;
-  outline: none;
-  font-size: 16px;
-  padding-left: 14px;
-  padding-right: 14px;
-  padding-top: 7px;
-  padding-bottom: 7px;
-  margin: 8px;
-  width: 100%
-  word-break: break-all;
-  word-wrap: break-word;
-}
-</style>
+    <title>Superchat Log</title>
+    <link href="" rel="icon">
+    <style>
+        body {
+            background: #12151C;
+            text-align: left;
+            color: white;
+            font-family: Arial;
+            font-size: 16px
+        }
+
+        @media only screen and (max-device-width: 830px) {
+            body {
+                zoom: 1.5
+            }
+        }
+
+        b {
+            color: #10B981
+        }
+
+        h1, h2, h3 {
+            margin: 0;
+        }
+
+        p {
+            padding-left: 15px;
+            margin: 0;
+        }
+
+        blockquote {
+            background: #262b3b;
+            color: white;
+            outline: none;
+            font-size: 16px;
+            padding-left: 14px;
+            padding-right: 14px;
+            padding-top: 7px;
+            padding-bottom: 7px;
+            margin: 8px;
+            width: 100%;
+            word-break: break-all;
+            word-wrap: break-word;
+        }
+    </style>
 </head>
-{{range .Display}}<blockquote>{{.}}</blockquote>{{end}}
+{{range .Display}}
+<blockquote>{{.}}</blockquote>
+{{end}}
 </body>
 </html>

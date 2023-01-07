@@ -7,18 +7,19 @@ import (
 	"encoding/json"
 	"fmt"
 	"html"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"net/smtp"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 	"text/template"
 	"time"
 	"unicode/utf8"
 
-	qrcode "github.com/skip2/go-qrcode"
+	"github.com/skip2/go-qrcode"
 )
 
 var ScamThreshold float64 = 0.005 // MINIMUM DONATION AMOUNT
@@ -47,7 +48,7 @@ var payTemplate *template.Template
 var checkTemplate *template.Template
 var alertTemplate *template.Template
 var viewTemplate *template.Template
-var topwidgetTemplate *template.Template
+var topWidgetTemplate *template.Template
 
 type configJson struct {
 	MinimumDonation  float64  `json:"MinimumDonation"`
@@ -202,10 +203,18 @@ func main() {
 		fmt.Println(err)
 	}
 	fmt.Println("reading config.json")
-	defer jsonFile.Close()
-	byteValue, _ := ioutil.ReadAll(jsonFile)
+	defer func(jsonFile *os.File) {
+		err := jsonFile.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}(jsonFile)
+	byteValue, _ := io.ReadAll(jsonFile)
 	var conf configJson
-	json.Unmarshal(byteValue, &conf)
+	err = json.Unmarshal(byteValue, &conf)
+	if err != nil {
+		panic(err) // Fatal error, stop program
+	}
 
 	ScamThreshold = conf.MinimumDonation
 	MessageMaxChar = conf.MaxMessageChars
@@ -234,25 +243,39 @@ func main() {
 		http.ServeFile(w, r, "web/xmr.svg")
 	})
 
-	http.HandleFunc("/", index_handler)
-	http.HandleFunc("/pay", payment_handler)
-	http.HandleFunc("/check", check_handler)
-	http.HandleFunc("/alert", alert_handler)
-	http.HandleFunc("/view", view_handler)
-	http.HandleFunc("/top", topwidget_handler)
+	http.HandleFunc("/", indexHandler)
+	http.HandleFunc("/pay", paymentHandler)
+	http.HandleFunc("/check", checkHandler)
+	http.HandleFunc("/alert", alertHandler)
+	http.HandleFunc("/view", viewHandler)
+	http.HandleFunc("/top", topwidgetHandler)
 
-	// Create files if they dont exist
-	os.OpenFile("log/paid.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	os.OpenFile("log/alertqueue.csv", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	os.OpenFile("log/superchats.csv", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	// Create files if they don't exist
+	_, err = os.OpenFile("log/paid.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = os.OpenFile("log/alertqueue.csv", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = os.OpenFile("log/superchats.csv", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		panic(err)
+	}
 
 	indexTemplate, _ = template.ParseFiles("web/index.html")
 	payTemplate, _ = template.ParseFiles("web/pay.html")
 	checkTemplate, _ = template.ParseFiles("web/check.html")
 	alertTemplate, _ = template.ParseFiles("web/alert.html")
 	viewTemplate, _ = template.ParseFiles("web/view.html")
-	topwidgetTemplate, _ = template.ParseFiles("web/top.html")
-	http.ListenAndServe(":8900", nil)
+	topWidgetTemplate, _ = template.ParseFiles("web/top.html")
+	err = http.ListenAndServe(":8900", nil)
+	if err != nil {
+		panic(err)
+	}
 }
 func mail(name string, amount string, message string) {
 	body := []byte(fmt.Sprintf("From: %s\n"+
@@ -288,7 +311,7 @@ func reverse(ss []string) {
 	}
 }
 
-func view_handler(w http.ResponseWriter, r *http.Request) {
+func viewHandler(w http.ResponseWriter, r *http.Request) {
 	var a viewPageData
 	var displayTemp string
 
@@ -303,12 +326,19 @@ func view_handler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			fmt.Println(err)
 		}
-		defer csvFile.Close()
+
+		defer func(csvFile *os.File) {
+			err := csvFile.Close()
+			if err != nil {
+				fmt.Println(err)
+			}
+		}(csvFile)
 
 		csvLines, err := csv.NewReader(csvFile).ReadAll()
 		if err != nil {
 			fmt.Println(err)
 		}
+
 		for _, line := range csvLines {
 			a.ID = append(a.ID, line[0])
 			a.Name = append(a.Name, line[1])
@@ -323,19 +353,24 @@ func view_handler(w http.ResponseWriter, r *http.Request) {
 		return // return http 401 unauthorized error
 	}
 	reverse(a.Display)
-	viewTemplate.Execute(w, a)
+	err := viewTemplate.Execute(w, a)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
 
-func check_handler(w http.ResponseWriter, r *http.Request) {
+func checkHandler(w http.ResponseWriter, r *http.Request) {
 
 	payload := strings.NewReader(`{"jsonrpc":"2.0","id":"0","method":"get_address"}`)
 	req, _ := http.NewRequest("POST", rpcURL, payload)
 	req.Header.Set("Content-Type", "application/json")
 	res, _ := http.DefaultClient.Do(req)
 	resp := &getAddress{}
+
 	if err := json.NewDecoder(res.Body).Decode(resp); err != nil {
 		fmt.Println(err.Error())
 	}
+
 	var c checkPage
 	c.Meta = `<meta http-equiv="Refresh" content="3">`
 	c.Addy = resp.Result.Address
@@ -373,20 +408,29 @@ func check_handler(w http.ResponseWriter, r *http.Request) {
 				text = append(text, scanner.Text())
 			}
 
-			file.Close()
+			err = file.Close()
+			if err != nil {
+				fmt.Println(err)
+			}
 
-			for _, each_ln := range text {
-				if each_ln == tx.PaymentID {
+			for _, eachLn := range text {
+				if eachLn == tx.PaymentID {
 					logged = true
 				}
 			}
+
 			if !logged {
 
 				f, err := os.OpenFile("log/paid.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 				if err != nil {
 					log.Println(err)
 				}
-				defer f.Close()
+				defer func(f *os.File) {
+					err := f.Close()
+					if err != nil {
+						fmt.Println(err)
+					}
+				}(f)
 				if _, err := f.WriteString(tx.PaymentID + "\n"); err != nil {
 					log.Println(err)
 				}
@@ -411,7 +455,12 @@ func check_handler(w http.ResponseWriter, r *http.Request) {
 					if err != nil {
 						log.Println(err)
 					}
-					defer f.Close()
+					defer func(f *os.File) {
+						err := f.Close()
+						if err != nil {
+							fmt.Println(err)
+						}
+					}(f)
 					csvAppend := fmt.Sprintf(`"%s","%s","%s","%s"`, c.PayID, html.EscapeString(c.Name), html.EscapeString(c.Msg), fmt.Sprint(c.Received))
 					if r.FormValue("show") != "true" {
 						csvAppend = fmt.Sprintf(`"%s","%s","%s","%s (hidden)"`, c.PayID, html.EscapeString(c.Name), html.EscapeString(c.Msg), fmt.Sprint(c.Received))
@@ -421,17 +470,26 @@ func check_handler(w http.ResponseWriter, r *http.Request) {
 					if err != nil {
 						log.Println(err)
 					}
-					defer a.Close()
+					defer func(a *os.File) {
+						err := a.Close()
+						if err != nil {
+							fmt.Println(err)
+						}
+					}(a)
 					fmt.Println(csvAppend)
+
 					if _, err := f.WriteString(csvAppend + "\n"); err != nil {
 						log.Println(err)
 					}
+
 					if r.FormValue("show") != "true" {
 						csvAppend = fmt.Sprintf(`"%s","%s","%s","???"`, c.PayID, html.EscapeString(c.Name), html.EscapeString(c.Msg))
 					}
+
 					if _, err := a.WriteString(csvAppend + "\n"); err != nil {
 						log.Println(err)
 					}
+
 					if enableEmail {
 						if r.FormValue("show") != "true" {
 							mail(c.Name, fmt.Sprint(c.Received)+" (hidden)", c.Msg)
@@ -467,26 +525,35 @@ func check_handler(w http.ResponseWriter, r *http.Request) {
 				text = append(text, scanner.Text())
 			}
 
-			file.Close()
+			err = file.Close()
+			if err != nil {
+				fmt.Println(err)
+			}
 
-			for _, each_ln := range text {
-				if each_ln == tx.PaymentID {
+			for _, eachLn := range text {
+				if eachLn == tx.PaymentID {
 					logged = true
 				}
 			}
+
 			if !logged {
 
 				f, err := os.OpenFile("log/paid.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 				if err != nil {
 					log.Println(err)
 				}
-				defer f.Close()
+				defer func(f *os.File) {
+					err := f.Close()
+					if err != nil {
+						fmt.Println(err)
+					}
+				}(f)
 				if _, err := f.WriteString(tx.PaymentID + "\n"); err != nil {
 					log.Println(err)
 				}
 
 				c.Meta = ""
-				c.Receipt = string(tx.Amount) + "Payment received! It is safe to close the tab"
+				c.Receipt = strconv.FormatInt(tx.Amount, 10) + "Payment received! It is safe to close the tab"
 				c.Received = float64(tx.Amount) / 1000000000000
 				if c.Received < ScamThreshold {
 					c.Receipt = "<b style='color:red'>Scammed! " + fmt.Sprint(c.Received) + " is below minimum</b>"
@@ -495,7 +562,7 @@ func check_handler(w http.ResponseWriter, r *http.Request) {
 				}
 
 				if c.Received < MediaMin {
-					c.Media = "" // remove media if chatter didnt pay the minimum
+					c.Media = "" // remove media if chatter didn't pay the minimum
 				}
 				if c.Msg == "" {
 					c.Msg = "⠀" // unicode blank space because discord doesnt accept empty messages
@@ -506,7 +573,12 @@ func check_handler(w http.ResponseWriter, r *http.Request) {
 					if err != nil {
 						log.Println(err)
 					}
-					defer f.Close()
+					defer func(f *os.File) {
+						err := f.Close()
+						if err != nil {
+							fmt.Println(err)
+						}
+					}(f)
 					csvAppend := fmt.Sprintf(`"%s","%s","%s","%s"`, c.PayID, html.EscapeString(c.Name), html.EscapeString(c.Msg), fmt.Sprint(c.Received))
 					if r.FormValue("show") != "true" {
 						csvAppend = fmt.Sprintf(`"%s","%s","%s","%s (hidden)"`, c.PayID, html.EscapeString(c.Name), html.EscapeString(c.Msg), fmt.Sprint(c.Received))
@@ -516,7 +588,12 @@ func check_handler(w http.ResponseWriter, r *http.Request) {
 					if err != nil {
 						log.Println(err)
 					}
-					defer a.Close()
+					defer func(a *os.File) {
+						err := a.Close()
+						if err != nil {
+							fmt.Println(err)
+						}
+					}(a)
 					fmt.Println(csvAppend)
 					if _, err := f.WriteString(csvAppend + "\n"); err != nil {
 						log.Println(err)
@@ -544,17 +621,23 @@ func check_handler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
-	checkTemplate.Execute(w, c)
+	err := checkTemplate.Execute(w, c)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
 
-func index_handler(w http.ResponseWriter) {
+func indexHandler(w http.ResponseWriter, _ *http.Request) {
 	var i indexDisplay
 	i.MaxChar = MessageMaxChar
 	i.MinAmnt = ScamThreshold
 	i.Checked = checked
-	indexTemplate.Execute(w, i)
+	err := indexTemplate.Execute(w, i)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
-func topwidget_handler(w http.ResponseWriter, r *http.Request) {
+func topwidgetHandler(w http.ResponseWriter, r *http.Request) {
 	u, p, ok := r.BasicAuth()
 	if !ok {
 		w.Header().Add("WWW-Authenticate", `Basic realm="Give username and password"`)
@@ -566,7 +649,12 @@ func topwidget_handler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			fmt.Println(err)
 		}
-		defer csvFile.Close()
+		defer func(csvFile *os.File) {
+			err := csvFile.Close()
+			if err != nil {
+				fmt.Println(err)
+			}
+		}(csvFile)
 
 		// TODO: Add an OBS widget displaying top n donors. Don't include amounts set as hidden by donor
 
@@ -579,10 +667,13 @@ func topwidget_handler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusUnauthorized)
 		return // return http 401 unauthorized error
 	}
-	topwidgetTemplate.Execute(w, nil)
+	err := topWidgetTemplate.Execute(w, nil)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
 
-func alert_handler(w http.ResponseWriter, r *http.Request) {
+func alertHandler(w http.ResponseWriter, r *http.Request) {
 	var v csvLog
 	v.Refresh = AlertWidgetRefreshInterval
 	if r.FormValue("auth") == password {
@@ -596,15 +687,28 @@ func alert_handler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			fmt.Println(err)
 		}
-		defer csvFile.Close()
+		defer func(csvFile *os.File) {
+			err := csvFile.Close()
+			if err != nil {
+				fmt.Println(err)
+			}
+		}(csvFile)
 
 		// Remove top line of CSV file after displaying it
 		if csvLines != nil {
 			popFile, _ := os.OpenFile("log/alertqueue.csv", os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
 			popFirst := csvLines[1:]
 			w := csv.NewWriter(popFile)
-			w.WriteAll(popFirst)
-			defer popFile.Close()
+			err := w.WriteAll(popFirst)
+			if err != nil {
+				fmt.Println(err)
+			}
+			defer func(popFile *os.File) {
+				err := popFile.Close()
+				if err != nil {
+					fmt.Println(err)
+				}
+			}(popFile)
 			v.ID = csvLines[0][0]
 			v.Name = csvLines[0][1]
 			v.Message = csvLines[0][2]
@@ -617,10 +721,13 @@ func alert_handler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusUnauthorized)
 		return // return http 401 unauthorized error
 	}
-	alertTemplate.Execute(w, v)
+	err := alertTemplate.Execute(w, v)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
 
-func payment_handler(w http.ResponseWriter, r *http.Request) {
+func paymentHandler(w http.ResponseWriter, r *http.Request) {
 
 	payload := strings.NewReader(`{"jsonrpc":"2.0","id":"0","method":"make_integrated_address"}`)
 	req, err := http.NewRequest("POST", rpcURL, payload)
@@ -659,7 +766,10 @@ func payment_handler(w http.ResponseWriter, r *http.Request) {
 			tmp, _ := qrcode.Encode(fmt.Sprintf("monero:%s?tx_amount=%s", resp.Result.IntegratedAddress, s.Amount), qrcode.Low, 320)
 			s.QRB64 = base64.StdEncoding.EncodeToString(tmp)
 
-			payTemplate.Execute(w, s)
+			err := payTemplate.Execute(w, s)
+			if err != nil {
+				fmt.Println(err)
+			}
 		} else {
 			w.WriteHeader(http.StatusInternalServerError)
 			return // return http 401 unauthorized error
